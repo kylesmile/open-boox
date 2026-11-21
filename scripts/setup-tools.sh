@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TOOLS="$ROOT/tools"
 mkdir -p "$TOOLS/loaders"
 
-brew install --quiet libusb payload-dumper-go openjdk apktool uv
+brew install --quiet libusb payload-dumper-go openjdk apktool uv pigz
 brew install --quiet --cask android-platform-tools
 # Homebrew leaves the download quarantine flag on platform-tools; macOS then
 # kills adb (exit 137) on first run.

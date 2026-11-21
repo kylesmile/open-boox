@@ -12,7 +12,7 @@ scripts/setup-tools.sh
 
 It installs, into `tools/` (gitignored) where possible:
 
-- Homebrew: `libusb`, `payload-dumper-go`, `openjdk`, `apktool`, `uv`, `android-platform-tools` (`adb`, `fastboot`)
+- Homebrew: `libusb`, `payload-dumper-go`, `openjdk`, `apktool`, `uv`, `pigz`, `android-platform-tools` (`adb`, `fastboot`)
 - A Python 3.13 venv in `tools/venv` with [`edl`](https://github.com/bkerler/edl), `pycryptodome`, `capstone`, `pyelftools`
 - The Lenovo/Motorola firehose loader into `tools/loaders/`
 - [decryptBooxUpdateUpx](https://github.com/Hagb/decryptBooxUpdateUpx) into `tools/decryptBooxUpdateUpx`

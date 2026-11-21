@@ -27,7 +27,7 @@ Other Boox models on the same Qualcomm platform will likely need only small chan
 > The backup script captures device-specific calibration data. Run that script before any others that interact with the device, and store the data in a safe place.
 
 1. **Set up** the host tools and the tablet: [docs/host-setup.md](docs/host-setup.md)
-2. **Back up** everything, including a raw dump of every partition over EDL: [docs/backup.md](docs/backup.md)
+2. **Back up** everything into one archive, including a raw dump of every partition over EDL: [docs/backup.md](docs/backup.md)
 3. **Root** stock firmware with Magisk and fix the Boox bug that breaks it: [docs/root.md](docs/root.md)
 4. **Study** Boox's e-ink stack and repeat the tracing: [docs/reverse-engineering.md](docs/reverse-engineering.md)
 
