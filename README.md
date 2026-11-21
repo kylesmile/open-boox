@@ -4,7 +4,8 @@ The current e-ink tablet market is in a sad state. There are many options for go
 
 This repository is for anyone with an Onyx Boox device who wants to remove the bloatware and spyware, and is the result of turning AI loose on one Note Air 4C device. It is a collection of scripts to interact with the device, and notes on what is uncovered, made public in hopes that others may find it useful.
 
-> **Warning.** Use these scripts and the notes in this reposotiry at your own risk! Some of the scripts write raw partitions over Qualcomm EDL. A mistake can leave the tablet unbootable. Take reasonable precautions, such as making a full backup and storing it somewhere safe, and reviewing the scripts before you run them. There's a good chance running these scripts will void your warranty.
+> [!WARNING]
+> Use these scripts and the notes in this repository at your own risk! Some of the scripts write raw partitions over Qualcomm EDL. A mistake can leave the tablet unbootable. Take reasonable precautions, such as making a full backup and storing it somewhere safe, and reviewing the scripts before you run them. There's a good chance running these scripts will void your warranty.
 
 ## Tested on
 
@@ -18,9 +19,12 @@ This repository is for anyone with an Onyx Boox device who wants to remove the b
 | Host | macOS on Apple Silicon |
 | Tools | Magisk v30.6 (debug build), bkerler `edl`, Lenovo/Motorola firehose loader `0000000000000000_bdaf51b59ba21d8a_fhprg.bin` |
 
-Other Boox models on the same Qualcomm platform will likely need only small changes, but nothing here has been tried on them. If you run this on another model or build, note what changed (see [AGENTS.md](AGENTS.md) for what to leave out).
+Other Boox models on the same Qualcomm platform will likely need only small changes, but nothing here has been tried on them. If you run this on another model or build, feel free to note what changed and submit a pull request (see [AGENTS.md](AGENTS.md) for what to leave out).
 
 ## What you can do with it
+
+> [!IMPORTANT]
+> The backup script captures device-specific calibration data. Run that script before any others that interact with the device, and store the data in a safe place.
 
 1. **Set up** the host tools and the tablet: [docs/host-setup.md](docs/host-setup.md)
 2. **Back up** everything, including a raw dump of every partition over EDL: [docs/backup.md](docs/backup.md)
@@ -29,42 +33,16 @@ Other Boox models on the same Qualcomm platform will likely need only small chan
 
 Notes on the stock software, firmware and drivers, one topic per page: [docs/stock-boox/](docs/stock-boox/README.md).
 
-## The short version
-
-- Boox's e-ink refresh lives in its modified **SurfaceFlinger**, which alone drives `/dev/ebc`. Apps reach it through extra Binder codes with no permission check (`adb shell service call SurfaceFlinger 16711718` does a full refresh).
-- **Fastboot cannot write** on the Note Air 4C. **EDL can** read and write every partition.
-- **Magisk needs two workarounds:** the v30.6 debug build (for `run-as` root and the `su` prompt), and a patched `services.jar` that fixes a Boox null-pointer bug.
-
 ## Layout
 
 ```
-scripts/            everything you run (table below)
+scripts/            everything you run
 docs/               step-by-step guides
 docs/stock-boox/    how Boox's stock software and drivers work
 backups/            (gitignored) your device snapshots and EDL dumps
 firmware/           (gitignored) patched images, the services.jar module, pulled Boox binaries
 tools/              (gitignored) host tools from scripts/setup-tools.sh
 ```
-
-## Scripts
-
-| Script | What it does | Touches the tablet? |
-|---|---|---|
-| `setup-tools.sh` | Install host tools into `tools/` | No |
-| `device-info.sh` | Snapshot props, partitions, packages, settings, input devices into `backups/<date>-info` | Reads |
-| `backup-user-data.sh` | Copy `/sdcard` and user-app APKs into `backups/<date>-userdata` | Reads |
-| `edl-dump.sh` | Raw dump of every partition over EDL (`SKIP_USERDATA=1` to skip userdata) | Reads (reboots to EDL) |
-| `edl-flash.sh <part> <img>` | Write one partition over EDL, read back, compare, reboot | **Writes** |
-| `firmware-extract.sh <update.upx> [model]` | Decrypt a Boox update and extract partition images | No |
-| `magisk-patch-boot.sh [img]` | Install the Magisk debug app, stage it, patch a boot image on the tablet | Installs an app; no flashing |
-| `build-ams-module.sh [jar]` | Build the `services.jar` fix module for the tablet's current build | Reads |
-| `root.sh '<cmd>'` | Run a command as root through the Magisk debug app | Depends on the command |
-| `pull-onyx-blobs.sh` | Copy Boox's e-ink binaries and libraries off the tablet | Reads |
-| `patch_ams_dex.py`, `patch_jar_entry.py` | Used by `build-ams-module.sh` | No |
-| `find_ioctls.py`, `ioctl_context.py` | List ioctl calls in an arm64 ELF, and the log strings near each | No |
-| `sf_transaction_codes.py` | List Boox's SurfaceFlinger Binder codes from decompiled `framework.jar` | No |
-
-Some scripts were written from commands first run by hand. `magisk-patch-boot.sh` runs the same commands that rooted the test tablet, but has not itself been run end to end; neither has `pull-onyx-blobs.sh`. `sf_transaction_codes.py` has been checked against 4.2-rel_04282.
 
 ## Reference checksums (4.2-rel_04282)
 
