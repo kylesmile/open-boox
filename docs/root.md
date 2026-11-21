@@ -9,12 +9,12 @@ Tested on a Note Air 4C, firmware 4.2-rel_04282, with an unlocked bootloader. Ba
    ```bash
    scripts/magisk-patch-boot.sh [stock-boot.img]
    ```
-   With no argument it uses the active slot's `boot` from your newest `backups/*-edl` dump. It installs the Magisk v30.6 debug app, stages Magisk's install folder through `run-as`, patches the image on the tablet, and saves it to `firmware/magisk-v30.6-debug/`. It does not flash.
+   With no argument it uses the active slot's `boot` from your newest EDL dump (`backups/<timestamp>/edl/` from `backup.sh`, or `backups/<timestamp>-edl/`). It installs the Magisk v30.6 debug app, stages Magisk's install folder through `run-as`, patches the image on the tablet, and saves it to `firmware/magisk-v30.6-debug/`. It does not flash.
 3. Flash it to the active slot (the script prints the exact line):
    ```bash
    scripts/edl-flash.sh boot_b firmware/magisk-v30.6-debug/boot_b-magisk-v30.6-debug.img
    ```
-   Expect `READBACK MATCH` and `boot_completed=1`.
+   Expect `READBACK MATCH` and `boot_completed=1`. Root works from this point, before you open Magisk.
 4. Unlock the tablet. Open Magisk once; it hangs on the splash screen, which is expected until step 6. Turn off Boox auto-freeze for Magisk, or globally ([stock-boox/auto-freeze.md](stock-boox/auto-freeze.md)).
 5. Check root:
    ```bash
@@ -24,21 +24,21 @@ Tested on a Note Air 4C, firmware 4.2-rel_04282, with an unlocked bootloader. Ba
    ```bash
    scripts/build-ams-module.sh
    ```
-   Run the install line it prints, then reboot and unlock.
-7. Open Magisk: it should reach the main screen.
+   Run the install line it prints. It copies the module to the tablet, installs it as root, and reboots. Unlock the tablet when it is up. The patched `services.jar` should hash `e541f84df0318f36…` (see the README), and `/system/framework/services.jar` on the tablet should now match.
+7. Open Magisk: it should reach the main screen and show Magisk `30.6 (30600) (D)` installed, with Ramdisk `Yes`.
 
 ## Undo
 
-As root, delete Magisk's files, then restore stock `boot`:
+As root, delete Magisk's files and logs, then restore stock `boot`:
 
 ```bash
-scripts/root.sh 'rm -rf /data/adb/magisk /data/adb/magisk.db /data/adb/modules /data/adb/modules_update /data/adb/post-fs-data.d /data/adb/service.d /metadata/watchdog/magisk'
+scripts/root.sh 'rm -rf /data/adb/magisk /data/adb/magisk.db /data/adb/modules /data/adb/modules_update /data/adb/post-fs-data.d /data/adb/service.d /metadata/watchdog/magisk /cache/magisk.log* /data/cache/magisk.log* /data/local/tmp/boox-ams-fix-*.zip'
 adb uninstall com.topjohnwu.magisk
 adb shell settings delete global auto_freeze_delay     # only if you set it
-scripts/edl-flash.sh boot_b backups/<timestamp>-edl/lun<N>/boot_b.bin
+scripts/edl-flash.sh boot_b backups/<timestamp>/edl/lun<N>/boot_b.bin
 ```
 
-Use your active slot in place of `boot_b`.
+Use your active slot in place of `boot_b`. Afterwards `/product/bin/su` is gone, and `/system/framework/services.jar` hashes back to the stock `fd45574a43099f3e…`.
 
 ## Why it works this way
 

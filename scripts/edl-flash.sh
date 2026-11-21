@@ -19,4 +19,13 @@ fi
 "$EDL" reset "$LD" >/dev/null 2>&1 || true
 T="$(command -v timeout || command -v gtimeout || true)"
 ${T:+$T 240} adb wait-for-device
-adb shell 'n=0; while [ "$(getprop sys.boot_completed)" != 1 ] && [ $n -lt 90 ]; do sleep 2; n=$((n+1)); done; echo boot_completed=$(getprop sys.boot_completed)'
+# Poll from the host: adbd can restart during boot and drop a long-running
+# adb shell, which used to end the script with exit 255 after a good flash.
+n=0; done_=""
+while [ "$done_" != 1 ] && [ $n -lt 90 ]; do
+  done_="$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
+  [ "$done_" = 1 ] || { sleep 2; adb wait-for-device; }
+  n=$((n+1))
+done
+echo "boot_completed=${done_:-0}"
+[ "$done_" = 1 ]

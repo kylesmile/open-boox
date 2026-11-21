@@ -3,7 +3,8 @@
 # folder, and patch a stock boot image on the device. Does NOT flash.
 #
 # Usage: scripts/magisk-patch-boot.sh [stock-boot.img]
-#   Default image: the active slot's boot from the newest backups/*-edl dump.
+#   Default image: the active slot's boot from the newest EDL dump
+#   (backups/<timestamp>/edl from backup.sh, or backups/<timestamp>-edl).
 # Then: scripts/edl-flash.sh boot_<slot> <output>
 #
 # Why debug build: the release app hangs on Boox (services.jar NPE) and the
@@ -17,8 +18,10 @@ SLOT="$(adb shell getprop ro.boot.slot_suffix | tr -d '\r')"
 if [ $# -ge 1 ]; then
   IMG="$1"
 else
-  DUMP="$(ls -d "$ROOT"/backups/*-edl 2>/dev/null | sort | tail -1)"
-  [ -n "$DUMP" ] || { echo "No backups/*-edl dump; run scripts/edl-dump.sh or pass an image"; exit 1; }
+  # Both layouts start with the timestamp, so a plain sort puts the newest last.
+  # ls exits 1 when one layout has no match; that must not stop the script.
+  DUMP="$( (ls -d "$ROOT"/backups/*/edl "$ROOT"/backups/*-edl 2>/dev/null || true) | sort | tail -1)"
+  [ -n "$DUMP" ] || { echo "No EDL dump in backups/; run scripts/backup.sh or pass an image"; exit 1; }
   IMG="$(find "$DUMP" -name "boot${SLOT}.bin" | head -1)"
   [ -n "$IMG" ] || { echo "boot${SLOT}.bin not found in $DUMP"; exit 1; }
 fi
@@ -31,8 +34,8 @@ adb install "$APK"
 
 S=/data/local/tmp/mgkdbg
 adb shell "rm -rf $S; mkdir -p $S"
-for f in magiskboot magiskinit magisk init-ld busybox magiskpolicy; do adb push "$L/lib$f.so" "$S/$f" >/dev/null; done
-for f in boot_patch.sh util_functions.sh stub.apk addon.d.sh app_functions.sh; do adb push "$A/$f" "$S/" >/dev/null; done
+for f in magiskboot magiskinit magisk init-ld busybox magiskpolicy; do adb push "$L/lib$f.so" "$S/$f" >/dev/null 2>&1; done
+for f in boot_patch.sh util_functions.sh stub.apk addon.d.sh app_functions.sh; do adb push "$A/$f" "$S/" >/dev/null 2>&1; done
 adb shell "chmod 755 $S/*"
 
 echo "== Stage the app's install folder (Magisk's post-fs-data copies it to /data/adb/magisk)"
@@ -40,11 +43,13 @@ echo "   The tablet must be unlocked (lock screen) or run-as fails."
 adb shell "run-as com.topjohnwu.magisk sh -c 'D=/data/user_de/0/com.topjohnwu.magisk/install; rm -rf \$D; mkdir -p \$D && cp $S/* \$D/ && chmod 755 \$D/*'"
 
 echo "== Patch $IMG"
-adb push "$IMG" "$S/boot.img" >/dev/null
-adb shell "cd $S && BOOTMODE=true KEEPVERITY=true KEEPFORCEENCRYPT=true PATCHVBMETAFLAG=false RECOVERYMODE=false ./busybox sh boot_patch.sh boot.img" \
+adb push "$IMG" "$S/boot.img" >/dev/null 2>&1
+adb shell "cd $S && BOOTMODE=true KEEPVERITY=true KEEPFORCEENCRYPT=true PATCHVBMETAFLAG=false RECOVERYMODE=false ./busybox sh boot_patch.sh boot.img 2>&1" \
   | grep -E '^- |Patch with|abort|rror'
 mkdir -p "$(dirname "$OUT")"
-adb pull "$S/new-boot.img" "$OUT" >/dev/null
+adb exec-out cat "$S/new-boot.img" > "$OUT"
+[ "$(adb shell sha256sum "$S/new-boot.img" | cut -d' ' -f1)" = \
+  "$(shasum -a 256 "$OUT" | cut -d' ' -f1)" ] || { echo "copy mismatch"; exit 1; }
 adb shell "rm -rf $S"
 shasum -a 256 "$OUT"
 echo "Next: scripts/edl-flash.sh boot$SLOT $OUT"
