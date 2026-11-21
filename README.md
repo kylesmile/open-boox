@@ -1,8 +1,10 @@
 # open-boox
 
-Scripts and notes for backing up, rooting and studying Onyx Boox e-ink tablets, with a map of how Boox's stock e-ink stack works. Everything here was worked out on one Note Air 4C; the steps are written so you can repeat them on your own tablet.
+The current e-ink tablet market is in a sad state. There are many options for good hardware, but most devices run a custom OS with little (if any) support for third-party apps, and tell you it's a feature (looking at you, reMarkable!). If you want an e-ink device that runs Android for the app ecosystem, you get your choice of ones that will (probably) spy on you. But with AI, there's no reason to settle for a questionable OS anymore.
 
-> **Warning.** These scripts write raw partitions over Qualcomm EDL. A mistake can leave the tablet unbootable. Take the full backup first, keep it somewhere safe, and read each script before you run it. Rooting voids the warranty.
+This repository is for anyone with an Onyx Boox device who wants to remove the bloatware and spyware, and is the result of turning AI loose on one Note Air 4C device. It is a collection of scripts to interact with the device, and notes on what is uncovered, made public in hopes that others may find it useful.
+
+> **Warning.** Use these scripts and the notes in this reposotiry at your own risk! Some of the scripts write raw partitions over Qualcomm EDL. A mistake can leave the tablet unbootable. Take reasonable precautions, such as making a full backup and storing it somewhere safe, and reviewing the scripts before you run them. There's a good chance running these scripts will void your warranty.
 
 ## Tested on
 
@@ -93,3 +95,7 @@ Guides, threads and tools used while working this out:
 - [Apktool](https://apktool.org/): decompiles `framework.jar` to smali
 - [Capstone](https://www.capstone-engine.org/) and [pyelftools](https://github.com/eliben/pyelftools): disassembly and ELF parsing in the ioctl scripts
 - [Dalvik executable format](https://source.android.com/docs/core/runtime/dex-format): header checksums and `class_data_item` layout used by `patch_ams_dex.py`
+
+## License
+
+[MIT](LICENSE).
