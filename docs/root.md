@@ -26,6 +26,7 @@ Tested on a Note Air 4C, firmware 4.2-rel_04282, with an unlocked bootloader. Ba
    ```
    Run the install line it prints. It copies the module to the tablet, installs it as root, and reboots. Unlock the tablet when it is up. The patched `services.jar` should hash `e541f84df0318f36…` (see the README), and `/system/framework/services.jar` on the tablet should now match.
 7. Open Magisk: it should reach the main screen and show Magisk `30.6 (30600) (D)` installed, with Ramdisk `Yes`.
+8. Run `scripts/backup.sh` again. Now that the tablet is rooted, it also copies app private data ([backup.md](backup.md#4-app-data-needs-root)).
 
 ## Undo
 

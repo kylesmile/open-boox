@@ -1,15 +1,15 @@
 # Back up the tablet
 
-Do all of this before writing anything to the tablet. Every step here only reads.
+Do all of this before writing anything to the tablet. Every backup step only reads, apart from stopping each app while its data is copied.
 
-Read step 1, then run all three backups with one command:
+Read step 1, then run every backup with one command:
 
 ```bash
 scripts/backup.sh                  # EDL dump includes userdata
 SKIP_USERDATA=1 scripts/backup.sh  # skips it
 ```
 
-It runs steps 2 to 4 in order into `backups/<timestamp>/` (`info/`, `userdata/`, `edl/`), which is gitignored. It then packs that folder into `backups/<timestamp>.tar.gz`, tests the archive, and writes its hash to `backups/<timestamp>.tar.gz.sha256`. Copy those two files to another drive, and check them there with `shasum -a 256 -c <timestamp>.tar.gz.sha256`. With userdata the whole run takes about 35 minutes, and the archive comes to about 14 GB.
+It runs steps 2 to 5 in order into `backups/<timestamp>/` (`info/`, `userdata/`, `appdata/`, `edl/`), which is gitignored. Step 4 needs root, so on a stock tablet `backup.sh` skips it. It then packs that folder into `backups/<timestamp>.tar.gz`, tests the archive, and writes its hash to `backups/<timestamp>.tar.gz.sha256`. Copy those two files to another drive, and check them there with `shasum -a 256 -c <timestamp>.tar.gz.sha256`. With userdata the whole run takes about 35 minutes, and the archive comes to about 14 GB, or 17 GB with app data.
 
 Each step's script also runs alone. Run that way, it writes `backups/<timestamp>-<kind>/` and its own `.tar.gz` and `.sha256`.
 
@@ -35,9 +35,43 @@ On stock firmware `/proc/cmdline` and `/proc/partitions` need root, so those two
 scripts/backup-user-data.sh
 ```
 
-Copies `/sdcard` and the APKs of user-installed apps, then checks every file against a SHA-256 taken on the tablet (`sdcard.sha256`, `apks.sha256`). Files that change during the copy, such as app logs under `Android/data`, show up as mismatches. The script still finishes but exits non-zero, and `backup.sh` goes on to the EDL dump and warns at the end.
+Copies `/sdcard` and the APKs of user-installed apps, then checks every file against a SHA-256 taken on the tablet (`sdcard.sha256`, `apks.sha256`). Files that change during the copy, such as app logs under `Android/data`, show up as mismatches. The script still finishes but exits non-zero, and `backup.sh` goes on and warns at the end.
 
-## 4. Full partition dump over EDL
+## 4. App data (needs root)
+
+```bash
+scripts/backup-app-data.sh               # user apps and the Boox apps below
+scripts/backup-app-data.sh <package> ... # only these
+```
+
+For each app, stops it and copies `/data/data/<pkg>`, `/data/user_de/0/<pkg>` and its `Android/data` and `Android/obb` folders under `/data/media/0`, without `cache` and `code_cache`. The Boox apps are listed in `BOOX_APPS`: the launcher and library (`com.onyx`), Notes, the reader, dictionary, touch calibration, voice recorder and sync. Set `BOOX_APPS` to change the list. Magisk itself is skipped.
+
+Each app gets `apps/<pkg>/` with:
+
+| File | Holds |
+|---|---|
+| `<pkg>.tar` | the data, with numeric owners |
+| `<pkg>.files` | owner, group, mode and SELinux label of every file and folder |
+| `<pkg>.sha256` | a hash of every file |
+| `<pkg>.info` | the app's uid and `versionCode` when backed up |
+
+The labels are kept in `.files` because toybox `tar --selinux` segfaults on this build. The script copies each tar through `/data/local/tmp` and checks its hash. Expect a minute or two and about a gigabyte for a dozen or so apps; a keyboard with downloaded language models can be most of it.
+
+### Restore
+
+```bash
+scripts/restore-app-data.sh backups/<timestamp>/appdata <package> ...
+```
+
+**Writes to the tablet:** each app's current data is replaced. With no package names it restores every app in the backup. The app must be installed. If it is not, and the backup came from `backup.sh`, the script installs it from `userdata/apks/<pkg>`. A warning is printed when the installed `versionCode` differs from the backup's.
+
+For each app it stops the app, deletes its data (keeping the empty cache folders), unpacks the tar, and sets every owner, mode and label from `.files`. A reinstalled app gets a new uid, so the script moves owners, groups and label categories from the old uid to the new one. It then compares every file's hash, owner, mode and label with the backup, and prints `restored N entries, uid OLD -> NEW`.
+
+Tested on one user-installed app, both after `pm clear` and after uninstalling and reinstalling it (which gave it a new uid). Both times the app opened with its settings, with no SELinux denials. Not yet tested on the Boox apps.
+
+Boox auto-freeze disables most user apps (`enabled=3` in `dumpsys package`). That is not a restore problem: opening the app from the launcher unfreezes it.
+
+## 5. Full partition dump over EDL
 
 ```bash
 scripts/edl-dump.sh                 # includes userdata
@@ -58,7 +92,7 @@ scripts/edl-flash.sh <partition> backups/<timestamp>/edl/lun<N>/<partition>.bin
 
 `edl-flash.sh` writes, reads back, compares hashes, and reboots. It prints `READBACK MATCH` on success and leaves the tablet in EDL on a mismatch.
 
-## 5. Stock firmware (optional)
+## 6. Stock firmware (optional)
 
 If you can get the `update.upx` for your build:
 
