@@ -6,7 +6,7 @@ Output goes to `backups/<timestamp>-<kind>/`, which is gitignored. Copy `backups
 
 ## 1. Before you start
 
-On the tablet, sync notes to Boox cloud, and export anything important from the Notes app as PDF. App private data needs root to copy.
+App private data needs root to copy. On the tablet, sync notes to Boox cloud, and export anything important from the Notes app as PDF. Or live (a little) dangerously and backup app private data after rooting.
 
 ## 2. Device snapshot
 

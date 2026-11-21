@@ -30,8 +30,5 @@ After any reboot, **unlock the lock screen** before using `run-as` (which `scrip
 
 ## Known problems
 
-- **`adb` killed with exit 137:** macOS quarantine on Homebrew's platform-tools. `setup-tools.sh` clears it; if it comes back, run `xattr -dr com.apple.quarantine "$(brew --prefix)/Caskroom/android-platform-tools"`.
-- **`edl` fails to install or run:** it needs a released Python. If your default `python3` is an alpha, the venv's 3.13 avoids it.
 - **`adb pull` silently does nothing** for some `/system` files (for example `services.jar`). Use `adb exec-out cat <file> > out` and compare `sha256sum`.
-- **macOS bash is 3.2:** an empty array under `set -u` is an error. The scripts use `${arr[@]+"${arr[@]}"}`.
 - **`edl` writes `edl_config.json`** (local path and chip serial) into the working directory. It is gitignored.
