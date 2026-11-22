@@ -1,0 +1,54 @@
+# Built-in packages for scripts/debloat.sh, checked on a Note Air 4C,
+# firmware 4.2-rel_04282.
+#
+#   keep    leave installed
+#   remove  remove for user 0 (the APK stays on /system; revert brings it back)
+#   decide  left alone until you pick keep or remove (scripts/debloat.sh pick)
+#
+# Your picks go in debloat/choices.txt, which is not committed and wins over
+# this file. Packages in neither file are never touched. The launcher and the
+# keyboard in use are never removed, whatever these files say.
+#
+# action  package                                  description
+
+# Boox apps the tablet needs
+keep      com.onyx                                 Launcher, library and Boox settings
+keep      com.onyx.floatingbutton                  Floating button (refresh modes)
+keep      com.onyx.tscalibration                   Pen and touch calibration
+keep      com.onyx.android.note                    Notes
+
+# Boox extras
+remove    com.onyx.appmarket                       App store
+remove    com.onyx.igetshop                        Shop
+remove    com.onyx.aiassistant                     AI assistant
+remove    com.onyx.mail                            Mail
+remove    com.onyx.musicplayer                     Music player
+remove    com.onyx.voicerecorder                   Voice recorder
+remove    com.onyx.gallery                         Gallery
+remove    com.onyx.calculator                      Calculator
+remove    com.onyx.clock                           Clock
+remove    com.onyx.dict                            Dictionary (the reader's word lookup uses it)
+remove    com.onyx.easytransfer                    Easy transfer
+remove    com.onyx.android.production.test         Factory test app
+decide    com.onyx.android.ksync                   Boox cloud sync (Notes keeps sync records with it)
+decide    com.onyx.kreader                         Reader
+decide    com.onyx.latinime                        Boox keyboard
+decide    com.onyx.kime                            Second Boox keyboard (Kime)
+decide    com.onyx.android.onyxotaservice          Firmware updates (see issue #9)
+decide    org.chromium.chrome                      Boox browser (Chromium)
+
+# Google (see issue #5)
+decide    com.android.vending                      Play Store
+decide    com.google.android.gms                   Play services
+decide    com.google.android.gsf                   Google services framework
+decide    com.google.android.gms.location.history  Location history
+decide    com.google.android.syncadapters.calendar Google Calendar sync
+decide    com.google.android.apps.restore          Restore from Google during setup
+decide    com.google.android.tts                   Google text-to-speech
+decide    com.google.android.configupdater         Google config updater
+
+# Android and Qualcomm extras
+decide    com.android.dreams.phototable            Photo screensaver
+decide    com.android.quicksearchbox               Search box
+decide    com.android.printservice.recommendation  Print service suggestions
+decide    com.quicinc.voice.activation             Qualcomm voice wake-up

@@ -30,7 +30,7 @@ Before committing, search the diff for serials and dates: `git diff --cached | g
 - Shell scripts start with `set -euo pipefail` and find the repo root with `ROOT="$(cd "$(dirname "$0")/.." && pwd)"`. Write output under `backups/`, `firmware/` or `tools/`.
 - macOS ships bash 3.2: no associative arrays, and expand possibly-empty arrays as `${arr[@]+"${arr[@]}"}`.
 - Run Python with the venv and isolated mode: `tools/venv/bin/python -I scripts/<name>.py`.
-- Copy files off the tablet with `adb exec-out cat`, not `adb pull`, and compare `sha256sum`.
+- Copy files off the tablet with `adb exec-out cat` and compare `sha256sum`. `adb pull` silently skips some `/system` files. Large files are the exception: `exec-out` can stall on them, so `backup-app-data.sh` and `backup-user-data.sh` use `adb pull`, then compare hashes.
 - Anything that writes to the tablet must read back and compare (see `edl-flash.sh`).
 
 ## Running commands

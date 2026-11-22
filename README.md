@@ -29,7 +29,8 @@ Other Boox models on the same Qualcomm platform will likely need only small chan
 1. **Set up** the host tools and the tablet: [docs/host-setup.md](docs/host-setup.md)
 2. **Back up** everything into one archive, including a raw dump of every partition over EDL: [docs/backup.md](docs/backup.md)
 3. **Root** stock firmware with Magisk and fix the Boox bug that breaks it: [docs/root.md](docs/root.md)
-4. **Study** Boox's e-ink stack and repeat the tracing: [docs/reverse-engineering.md](docs/reverse-engineering.md)
+4. **De-bloat** the built-in apps, choosing which to keep: [docs/debloat.md](docs/debloat.md)
+5. **Study** Boox's e-ink stack and repeat the tracing: [docs/reverse-engineering.md](docs/reverse-engineering.md)
 
 Notes on the stock software, firmware and drivers, one topic per page: [docs/stock-boox/](docs/stock-boox/README.md).
 
@@ -39,6 +40,7 @@ Notes on the stock software, firmware and drivers, one topic per page: [docs/sto
 scripts/            everything you run
 docs/               step-by-step guides
 docs/stock-boox/    how Boox's stock software and drivers work
+debloat/            which built-in apps to keep or remove (your picks: choices.txt, gitignored)
 backups/            (gitignored) your device snapshots and EDL dumps
 firmware/           (gitignored) patched images, the services.jar module, pulled Boox binaries
 tools/              (gitignored) host tools from scripts/setup-tools.sh

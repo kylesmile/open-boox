@@ -3,3 +3,4 @@ firmware/
 tools/
 edl_config.json
 .DS_Store
+debloat/choices.txt
