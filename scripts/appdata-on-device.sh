@@ -58,10 +58,11 @@ restore)
   new="$(stat -c %u "data/data/$p")"
   oa=$((old - 10000)); na=$((new - 10000))
   # Android app ids: uid 10000+a, cache gid 20000+a, ext gid 30000+a,
-  # shared gid 50000+a. Labels carry categories c<a&255>,c<256+a>>8>.
+  # ext cache gid 40000+a, shared gid 50000+a. Labels carry categories
+  # c<a&255>,c<256+a>>8>.
   mapid() {
     case "$1" in
-      "$old"|$((20000 + oa))|$((30000 + oa))|$((50000 + oa))) echo $(($1 - oa + na)) ;;
+      "$old"|$((20000 + oa))|$((30000 + oa))|$((40000 + oa))|$((50000 + oa))) echo $(($1 - oa + na)) ;;
       *) echo "$1" ;;
     esac
   }
